@@ -1,0 +1,138 @@
+
+// klk2017najjaceDoc.cpp : implementation of the Cklk2017najjaceDoc class
+//
+
+#include "pch.h"
+#include "framework.h"
+// SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
+// and search filter handlers and allows sharing of document code with that project.
+#ifndef SHARED_HANDLERS
+#include "klk2017najjace.h"
+#endif
+
+#include "klk2017najjaceDoc.h"
+
+#include <propkey.h>
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+// Cklk2017najjaceDoc
+
+IMPLEMENT_DYNCREATE(Cklk2017najjaceDoc, CDocument)
+
+BEGIN_MESSAGE_MAP(Cklk2017najjaceDoc, CDocument)
+END_MESSAGE_MAP()
+
+
+// Cklk2017najjaceDoc construction/destruction
+
+Cklk2017najjaceDoc::Cklk2017najjaceDoc() noexcept
+{
+	// TODO: add one-time construction code here
+
+}
+
+Cklk2017najjaceDoc::~Cklk2017najjaceDoc()
+{
+}
+
+BOOL Cklk2017najjaceDoc::OnNewDocument()
+{
+	if (!CDocument::OnNewDocument())
+		return FALSE;
+
+	// TODO: add reinitialization code here
+	// (SDI documents will reuse this document)
+
+	return TRUE;
+}
+
+
+
+
+// Cklk2017najjaceDoc serialization
+
+void Cklk2017najjaceDoc::Serialize(CArchive& ar)
+{
+	if (ar.IsStoring())
+	{
+		// TODO: add storing code here
+	}
+	else
+	{
+		// TODO: add loading code here
+	}
+}
+
+#ifdef SHARED_HANDLERS
+
+// Support for thumbnails
+void Cklk2017najjaceDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
+{
+	// Modify this code to draw the document's data
+	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
+
+	CString strText = _T("TODO: implement thumbnail drawing here");
+	LOGFONT lf;
+
+	CFont* pDefaultGUIFont = CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT));
+	pDefaultGUIFont->GetLogFont(&lf);
+	lf.lfHeight = 36;
+
+	CFont fontDraw;
+	fontDraw.CreateFontIndirect(&lf);
+
+	CFont* pOldFont = dc.SelectObject(&fontDraw);
+	dc.DrawText(strText, lprcBounds, DT_CENTER | DT_WORDBREAK);
+	dc.SelectObject(pOldFont);
+}
+
+// Support for Search Handlers
+void Cklk2017najjaceDoc::InitializeSearchContent()
+{
+	CString strSearchContent;
+	// Set search contents from document's data.
+	// The content parts should be separated by ";"
+
+	// For example:  strSearchContent = _T("point;rectangle;circle;ole object;");
+	SetSearchContent(strSearchContent);
+}
+
+void Cklk2017najjaceDoc::SetSearchContent(const CString& value)
+{
+	if (value.IsEmpty())
+	{
+		RemoveChunk(PKEY_Search_Contents.fmtid, PKEY_Search_Contents.pid);
+	}
+	else
+	{
+		CMFCFilterChunkValueImpl *pChunk = nullptr;
+		ATLTRY(pChunk = new CMFCFilterChunkValueImpl);
+		if (pChunk != nullptr)
+		{
+			pChunk->SetTextValue(PKEY_Search_Contents, value, CHUNK_TEXT);
+			SetChunkValue(pChunk);
+		}
+	}
+}
+
+#endif // SHARED_HANDLERS
+
+// Cklk2017najjaceDoc diagnostics
+
+#ifdef _DEBUG
+void Cklk2017najjaceDoc::AssertValid() const
+{
+	CDocument::AssertValid();
+}
+
+void Cklk2017najjaceDoc::Dump(CDumpContext& dc) const
+{
+	CDocument::Dump(dc);
+}
+#endif //_DEBUG
+
+
+// Cklk2017najjaceDoc commands
