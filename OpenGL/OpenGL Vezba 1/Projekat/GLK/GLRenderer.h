@@ -7,7 +7,11 @@ public:
 	virtual ~CGLRenderer(void);
 		
 	bool CreateGLContext(CDC* pDC);			// kreira OpenGL Rendering Context
-	void PrepareScene(CDC* pDC);			// inicijalizuje scenu,
+	void PrepareScene(CDC* pDC);
+	void SetLightingBase();
+	UINT LoadTexture(char* file);
+	void SetMaterial(float ambient[4], float diffuse[4], float specular[4], float emission[4], int shininess);
+	// inicijalizuje scenu,
 	void DrawCylinder(CDC* pDC, double r, double h,  double angle_step, double red, double green, double blue);
 	void DrawCylinderOpt(CDC* pDC, double r, double h, double angle_step, double red, double green, double blue);
 	void DrawCone(CDC* pDC, double r, double h, double angle_step);

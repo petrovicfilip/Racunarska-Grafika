@@ -8,6 +8,7 @@
 using namespace std;
 #include <vector>;
 //#pragma comment(lib, "GL\\glut32.lib")
+#include "DImage.h"
 #define PI 3.141592
 #define DEG_TO_RAD(a) (((a) * PI) / 180.0)
 
@@ -59,15 +60,55 @@ void CGLRenderer::PrepareScene(CDC *pDC)
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glShadeModel(GL_SMOOTH);
-	float globalAmbient[] = { 0.3,0.3,0.3,1 };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
+
+	//glEnable(GL_LIGHTING);
+	//glEnable(GL_COLOR_MATERIAL);
+	////glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	//glShadeModel(GL_SMOOTH);
+	//float globalAmbient[] = { 0.3,0.3,0.3,1 };
+	//glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
+	SetLightingBase();
+
 	//---------------------------------
 	wglMakeCurrent(NULL, NULL);
 }
+
+void CGLRenderer::SetLightingBase()
+{
+	float globalAmbient[4] = {0.3, 0.3, 0.3, 1.0};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
+
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, TRUE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, TRUE);
+	
+	glEnable(GL_LIGHTING);
+
+	glEnable(GL_COLOR_MATERIAL);
+	//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+}
+
+UINT CGLRenderer::LoadTexture(char* file)
+{
+	UINT texID;
+	DImage img;
+
+	img.Load(CString(file));
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, img.Width(), img.Height(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.GetDIBBits());
+
+	return texID;
+}
+
 
 void CGLRenderer::Reshape(CDC* pDC, int w, int h)
 {
@@ -108,6 +149,14 @@ void NormCrossProd(double v1[3], double v2[3], double out[3])
 	out[2] /= d;
 }
 
+void CGLRenderer::SetMaterial(float ambient[4], float diffuse[4], float specular[4], float emission[4], int shininess)
+{
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission);
+	glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+}
 
 void CGLRenderer::DrawCylinder(CDC* pDC, double r, double h, double angle_step, double red, double green, double blue)
 {
