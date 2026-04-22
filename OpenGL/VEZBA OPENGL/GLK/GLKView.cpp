@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CGLKView, CView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CGLKView construction/destruction
@@ -196,4 +197,12 @@ void CGLKView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	CView::OnMouseMove(nFlags, point);
+}
+
+BOOL CGLKView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	glr.zoom -= zDelta / 1000.0;
+	Invalidate();
+
+	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }

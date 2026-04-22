@@ -87,27 +87,27 @@ void CGLRenderer::SetLightingBase()
 	//glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 }
 
-UINT CGLRenderer::LoadTexture(char* file)
-{
-	UINT texID;
-	DImage img;
-
-	img.Load(CString(file));
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, img.Width(), img.Height(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.GetDIBBits());
-
-	return texID;
-}
+//UINT CGLRenderer::LoadTexture(char* file)
+//{
+//	UINT texID;
+//	DImage img;
+//
+//	img.Load(CString(file));
+//	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+//	glGenTextures(1, &texID);
+//	glBindTexture(GL_TEXTURE_2D, texID);
+//
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+//
+//	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, img.Width(), img.Height(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.GetDIBBits());
+//
+//	return texID;
+//}
 
 
 void CGLRenderer::Reshape(CDC* pDC, int w, int h)
@@ -428,14 +428,19 @@ void CGLRenderer::DrawScene(CDC *pDC)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
-	double rad_pitch = DEG_TO_RAD(pitch);
-	double rad_yaw = DEG_TO_RAD(yaw);
+	//double rad_pitch = DEG_TO_RAD(pitch);
+	//double rad_yaw = DEG_TO_RAD(yaw);
 
-	double eyex = zoom * r_cam * cos(rad_pitch) * sin(rad_yaw);
-	double eyey = zoom * r_cam * sin(rad_pitch);
-	double eyez = zoom * r_cam * cos(rad_pitch) * cos(rad_yaw);
+	//double eyex = zoom * r_cam * cos(rad_pitch) * sin(rad_yaw);
+	//double eyey = zoom * r_cam * sin(rad_pitch);
+	//double eyez = zoom * r_cam * cos(rad_pitch) * cos(rad_yaw);
 
-	gluLookAt(eyex, eyey, eyez, 0, 0, 0, 0, 1, 0);
+	//gluLookAt(eyex, eyey, eyez, 0, 0, 0, 0, 1, 0);
+	glRotated(-y_angle, 0, 1, 0);
+	glRotated(-x_angle, 1, 0, 0);
+	glTranslatef(0, -10, -dist);
+	glRotatef(-30, 0, 1, 0);
+	glRotatef(-rot_angle, 0, 1, 0);
 
 	float ambient[] = { 0.3,0.3,0.3,1 };
 	float diffuse[] = { 0.8,0.8,0.8,1 };
@@ -456,28 +461,34 @@ void CGLRenderer::DrawScene(CDC *pDC)
 	DrawAxes();
 	DrawGround(pDC, 5, 100, 50);
 	DrawCone(pDC, 10, 20, 1);
+	//glTranslatef(0, 20, 0);
+	//glPushMatrix();
+	glTranslated(20, 0, -20);
+	//glRotated(45, 1, 0, 0);
+	DrawCone(pDC, 10, 20, 1);
+	glTranslated(-20, 0, 20);
+	glTranslated(-20, 0, 20);
+	DrawCone(pDC, 10, 20, 1);
 
-	glTranslatef(0, 20, 0);
-	glPushMatrix();
-	glRotatef(-60, 0, 0, 1);
-	DrawCylinder(pDC, 7, 20, 10, 0, 0.5, 0.5);
-	glTranslatef(0, 20 + 7, 0);
-	DrawSphere(pDC, 7, 2, 2, 0.5, 0, 0);
-	glPopMatrix();
+	//glRotatef(-60, 0, 0, 1);
+	//DrawCylinder(pDC, 7, 20, 10, 0, 0.5, 0.5);
+	//glTranslatef(0, 20 + 7, 0);
+	//DrawSphere(pDC, 7, 2, 2, 0.5, 0, 0);
+	//glPopMatrix();
 
-	glRotatef(angle_x, 1, 0, 0);
-	glRotatef(angle_z, 0, 0, 1);
-	DrawCylinder(pDC, 7, 20, 10, 1, 0.0, 0.5);
-	glTranslatef(0, 20 + 7, 0);
-	DrawSphere(pDC, 7, 2, 2, 0.5, 0, 0);
-	glTranslatef(0, -20 - 7, 0);
+	//glRotatef(angle_x, 1, 0, 0);
+	//glRotatef(angle_z, 0, 0, 1);
+	//DrawCylinder(pDC, 7, 20, 10, 1, 0.0, 0.5);
+	//glTranslatef(0, 20 + 7, 0);
+	//DrawSphere(pDC, 7, 2, 2, 0.5, 0, 0);
+	//glTranslatef(0, -20 - 7, 0);
 
-	glRotatef(-angle_z, 0, 0, 1);
-	glRotatef(-angle_x, 1, 0, 0);
-	glRotatef(60, 0, 0, 1);
-	DrawCylinder(pDC, 7, 20, 1, 1, 0.5, 0.0);
-	glTranslatef(0, 20 + 7, 0);
-	DrawSphere(pDC, 7, 10, 10, 0.5, 0, 0);
+	//glRotatef(-angle_z, 0, 0, 1);
+	//glRotatef(-angle_x, 1, 0, 0);
+	//glRotatef(60, 0, 0, 1);
+	//DrawCylinder(pDC, 7, 20, 1, 1, 0.5, 0.0);
+	//glTranslatef(0, 20 + 7, 0);
+	//DrawSphere(pDC, 7, 10, 10, 0.5, 0, 0);
 
 	glFlush();
 	SwapBuffers(pDC->m_hDC);

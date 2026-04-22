@@ -66,7 +66,7 @@ void CGLKView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
-	m_glRenderer.DrawScene(pDC);
+	glr.DrawScene(pDC);
 }
 
 
@@ -119,7 +119,7 @@ int CGLKView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	CDC* pDC = GetDC();
-	m_glRenderer.CreateGLContext(pDC);
+	glr.CreateGLContext(pDC);
 	ReleaseDC(pDC);
 
 	return 0;
@@ -131,7 +131,7 @@ void CGLKView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 
 	CDC* pDC = GetDC();
-	m_glRenderer.Reshape(pDC, cx, cy);
+	glr.Reshape(pDC, cx, cy);
 	ReleaseDC(pDC);
 }
 
@@ -141,7 +141,7 @@ void CGLKView::OnDestroy()
 	CView::OnDestroy();
 
 	CDC* pDC = GetDC();
-	m_glRenderer.DestroyScene(pDC);
+	glr.DestroyScene(pDC);
 	ReleaseDC(pDC);	
 }
 
@@ -157,7 +157,7 @@ void CGLKView::OnInitialUpdate()
 	CView::OnInitialUpdate();
 
 	CDC* pDC = GetDC();
-	m_glRenderer.PrepareScene(pDC);
+	glr.PrepareScene(pDC);
 	ReleaseDC(pDC);
 }
 
@@ -167,31 +167,59 @@ void CGLKView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		case 'G':
 		{
-			m_glRenderer.grid = !m_glRenderer.grid;
+			glr.grid = !glr.grid;
 			Invalidate();
 			break;
 		}
 		case VK_UP:
 		{
-			m_glRenderer.angle_x -= 2.0;
+			//m_glRenderer.angle_x -= 2.0;
+			glr.dist -= 2.;
 			Invalidate();
 			break;
 		}
 		case VK_DOWN:
 		{
-			m_glRenderer.angle_x += 2.0;
+			//m_glRenderer.angle_x += 2.0;
+			glr.dist += 2.;
 			Invalidate();
 			break;
 		}
 		case VK_LEFT:
 		{
-			m_glRenderer.angle_z += 2.0;
+			//m_glRenderer.angle_z += 2.0;
+			glr.y_angle += 2.;
 			Invalidate();
 			break;
 		}
 		case VK_RIGHT:
 		{
-			m_glRenderer.angle_z -= 2.0;
+			//m_glRenderer.angle_z -= 2.0;
+			glr.y_angle -= 2.;
+			Invalidate();
+			break;
+		}
+		case 'A':
+		{
+			glr.rot_angle -= 2.;
+			Invalidate();
+			break;
+		}
+		case 'D':
+		{
+			glr.rot_angle += 2.;
+			Invalidate();
+			break;
+		}
+		case 'W':
+		{
+			glr.x_angle -= 2.;
+			Invalidate();
+			break;
+		}
+		case 'S':
+		{
+			glr.x_angle += 2.;
 			Invalidate();
 			break;
 		}
@@ -202,30 +230,30 @@ void CGLKView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CGLKView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	m_glRenderer.is_pressed = true;
-	m_glRenderer.last_x = point.x;
-	m_glRenderer.last_y = point.y;
+	glr.is_pressed = true;
+	glr.last_x = point.x;
+	glr.last_y = point.y;
 	CView::OnLButtonDown(nFlags, point);
 }
 
 void CGLKView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	m_glRenderer.is_pressed = false;
+	glr.is_pressed = false;
 	CView::OnLButtonUp(nFlags, point);
 }
 
 void CGLKView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if (m_glRenderer.is_pressed)
+	if (glr.is_pressed)
 	{
-		int dx = point.x - m_glRenderer.last_x;
-		int dy = point.y - m_glRenderer.last_y;
+		int dx = point.x - glr.last_x;
+		int dy = point.y - glr.last_y;
 
-		m_glRenderer.yaw -= dx * 0.2;
-		m_glRenderer.pitch += dy * 0.2;
+		glr.yaw -= dx * 0.2;
+		glr.pitch += dy * 0.2;
 
-		m_glRenderer.last_x = point.x;
-		m_glRenderer.last_y = point.y;
+		glr.last_x = point.x;
+		glr.last_y = point.y;
 
 		Invalidate();
 	}
@@ -237,11 +265,11 @@ BOOL CGLKView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	if (zDelta > 0)
 	{
-		m_glRenderer.zoom -= zDelta / 1000.0;
+		glr.zoom -= zDelta / 1000.0;
 	}
 	else
 	{
-		m_glRenderer.zoom -= zDelta / 1000.0;
+		glr.zoom -= zDelta / 1000.0;
 	}
 	Invalidate();
 

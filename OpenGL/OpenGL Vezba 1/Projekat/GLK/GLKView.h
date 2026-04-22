@@ -17,7 +17,7 @@ public:
 	CGLKDoc* GetDocument() const;
 
 protected:
-	CGLRenderer m_glRenderer;
+	CGLRenderer glr;
 
 // Operations
 public:

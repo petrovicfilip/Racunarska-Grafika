@@ -38,4 +38,10 @@ public:
 	double zoom = 1.0;
 
 	bool grid = true;
+
+	// ... 
+	double dist = 0.0;
+	double y_angle = 0.0;
+	double rot_angle = 0.0;
+	double x_angle = 0.0;
 };

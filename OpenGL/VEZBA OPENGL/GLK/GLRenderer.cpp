@@ -50,12 +50,37 @@ void CGLRenderer::SetLightingBase()
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globalAmbient);
 
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, TRUE);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, TRUE); // !!!!!!!!!!! lajt model dve strane
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); // !!!!!!!!!!! lajt model dve strane
 
 	glEnable(GL_COLOR_MATERIAL); // !!!!!!!!! kolor materijal
 
 	glEnable(GL_LIGHTING);
+}
+
+void CGLRenderer::SetLocalLighting(int light)
+{
+	float ambient[4] = {0.3, 0.3, 0.3, 1};
+	float diffuse[4] = {0.8, 0.8, 0.8, 1};
+	float specular[4] = {1, 1, 1, 1};
+	float position[4] = {0, 6, 0, 1};
+
+	glLightfv(light, GL_AMBIENT, ambient);
+	glLightfv(light, GL_DIFFUSE, diffuse);
+	glLightfv(light, GL_SPECULAR, specular);
+	glLightfv(light, GL_POSITION, position);
+
+	glLighti(light, GL_CONSTANT_ATTENUATION, 1.);
+	glLighti(light, GL_LINEAR_ATTENUATION, 0.05);
+	glLighti(light, GL_QUADRATIC_ATTENUATION, 0.02);
+
+	float direction[3] = { 0, -1, 0 };
+	glLightfv(light, GL_SPOT_DIRECTION, direction);
+	glLightf(light, GL_SPOT_CUTOFF, 45.);
+	glLightf(light, GL_SPOT_EXPONENT, 2.);
+
+	glEnable(light);
+
 }
 
 UINT CGLRenderer::LoadTexture(char* file)
@@ -73,7 +98,7 @@ UINT CGLRenderer::LoadTexture(char* file)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // !!!
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // !!!
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // !!!!!!!!!!!!!!!!!!!!!!!
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // !!!!!!!!!!!!!!!!!!!!!!! env
 
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, img.Width(), img.Height(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.GetDIBBits());
 
@@ -104,8 +129,11 @@ void CGLRenderer::PrepareScene(CDC *pDC)
 	glClearColor(1, 1, 1, 0);
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
-	//SetLightingBase();
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
+	texWall = LoadTexture("Wall512.BMP");
+	texCustom = LoadTexture("serba.jpg");
+	SetLightingBase();
 	//---------------------------------
 	wglMakeCurrent(NULL, NULL);
 }
@@ -135,7 +163,107 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 	}
 }
 
-void CGLRenderer::DrawScene(CDC *pDC)
+void CGLRenderer::SetMaterial(float ambient[4], float diffuse[4], float specular[4], float emission[4], int shininess)
+{
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT, GL_EMISSION, emission);
+	glMateriali(GL_FRONT, GL_SHININESS, shininess);
+}
+
+
+void CGLRenderer::DrawCube(double a, Color color)
+{
+	glColor3f((float)color.r / 255., (float)color.g / 255., (float)color.b / 255.);
+
+	double half_a = a / 2;
+
+	glBegin(GL_QUADS);
+
+	glNormal3f(0, 0, 1);
+	glTexCoord2f(0, 1);
+	glVertex3f(-half_a, -half_a, half_a);
+	glNormal3f(0, 0, 1);
+	glTexCoord2f(1, 1);
+	glVertex3f(half_a, -half_a, half_a);
+	glNormal3f(0, 0, 1);
+	glTexCoord2f(1, 0);
+	glVertex3f(half_a, half_a, half_a);
+	glNormal3f(0, 0, 1);
+	glTexCoord2f(0, 0);
+	glVertex3f(-half_a, half_a, half_a);
+
+	glNormal3f(1, 0, 0);
+	glTexCoord2f(0, 0);
+	glVertex3f(half_a, -half_a, half_a);
+	glNormal3f(1, 0, 0);
+	glTexCoord2f(1, 0);
+	glVertex3f(half_a, -half_a, -half_a);
+	glNormal3f(1, 0, 0);
+	glTexCoord2f(1, 1);
+	glVertex3f(half_a, half_a, -half_a);
+	glNormal3f(1, 0, 0);
+	glTexCoord2f(0, 1);
+	glVertex3f(half_a, half_a, half_a);
+	
+	glNormal3f(0, 0, -1);
+	glTexCoord2f(0, 0);
+	glVertex3f(half_a, -half_a, -half_a);
+	glNormal3f(0, 0, -1);
+	glTexCoord2f(1, 0);
+	glVertex3f(-half_a, -half_a, -half_a);
+	glNormal3f(0, 0, -1);
+	glTexCoord2f(1, 1);
+	glVertex3f(-half_a, half_a, -half_a);
+	glNormal3f(0, 0, -1);
+	glTexCoord2f(0, 1);
+	glVertex3f(half_a, half_a, -half_a);
+
+	glNormal3f(-1, 0, 0);
+	glTexCoord2f(0, 0);
+	glVertex3f(-half_a, -half_a, -half_a);
+	glNormal3f(-1, 0, 0);
+	glTexCoord2f(1, 0);
+	glVertex3f(-half_a, -half_a, half_a);
+	glNormal3f(-1, 0, 0);
+	glTexCoord2f(1, 1);
+	glVertex3f(-half_a, half_a, half_a);
+	glNormal3f(-1, 0, 0);
+	glTexCoord2f(0, 1);
+	glVertex3f(-half_a, half_a, -half_a);
+
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(0, 0);
+	glVertex3f(-half_a, half_a, half_a);
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(1, 0);
+	glVertex3f(half_a, half_a, half_a);
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(1, 1);
+	glVertex3f(half_a, half_a, -half_a);
+	glNormal3f(0, 1, 0);
+	glTexCoord2f(0, 1);
+	glVertex3f(-half_a, half_a, -half_a);
+
+	glNormal3f(0, -1, 0);
+	glTexCoord2f(0, 0);
+	glVertex3f(half_a, -half_a, half_a);
+	glNormal3f(0, -1, 0);
+	glTexCoord2f(1, 0);
+	glVertex3f(-half_a, -half_a, half_a);
+	glNormal3f(0, -1, 0);
+	glTexCoord2f(1, 1);
+	glVertex3f(-half_a, -half_a, -half_a);
+	glNormal3f(0, -1, 0);
+	glTexCoord2f(0, 1);
+	glVertex3f(half_a, -half_a, -half_a);
+
+	glEnd();
+}
+
+
+void CGLRenderer::DrawScene(CDC* pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//---------------------------------
@@ -148,17 +276,35 @@ void CGLRenderer::DrawScene(CDC *pDC)
 
 	gluLookAt(eye_x, eye_y, eye_z, 0, 0, 0, 0, 1, 0);
 
+	float ambient[4] = { 0.3, 0.3, 0.3, 1 };
+	float diffuse[4] = { 0.8, 0.8, 0.8, 1 };
+	float specular[4] = { 1, 1, 1, 1 };
+	float position[4] = {1, 1, 1, 0};
+	
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	//glEnable(GL_LIGHT0);
 	// crtanje
+	SetLocalLighting(GL_LIGHT1);
+	glDisable(GL_TEXTURE_2D);
 	DrawAxes();
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
 
-	glBegin(GL_TRIANGLES);
-	glColor3f(1.0, 0, 0);
-	glVertex3d(-0.5, -0.5, -0.5);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3d(0.5, -0.5, -0.5);
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3d(0.5, 0.5, -0.5);
-	glEnd();
+	glBindTexture(GL_TEXTURE_2D, texCustom);
+	DrawCube(2., Color{ 255, 0, 0 });
+	glEnable(GL_CULL_FACE);
+
+	//glBegin(GL_TRIANGLES);
+	//glColor3f(1.0, 0, 0);
+	//glVertex3d(-0.5, -0.5, -0.5);
+	//glColor3f(0.0, 1.0, 0.0);
+	//glVertex3d(0.5, -0.5, -0.5);
+	//glColor3f(0.0, 0.0, 1.0);
+	//glVertex3d(0.5, 0.5, -0.5);
+	//glEnd();
 
 
 	glFlush();
